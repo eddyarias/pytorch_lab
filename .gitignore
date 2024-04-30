@@ -1,0 +1,11 @@
+notebooks/
+checkpoints/
+figures/
+
+*.ipynb
+*.ipynb_checkpoints
+*.asv
+*.pyc
+*.out
+*.pth
+*.onnx
