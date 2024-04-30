@@ -6,7 +6,7 @@ from argparse import ArgumentParser as argparse
 import torch
 from torch.utils.data import DataLoader
 
-from models.siamese import model_embeddings
+from models.siamese import siamese_embeddings
 from dataloaders.Image_Dataset import Image_Dataset
 
 

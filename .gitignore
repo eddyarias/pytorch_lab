@@ -7,5 +7,6 @@ figures/
 *.asv
 *.pyc
 *.out
+*.npz
 *.pth
 *.onnx

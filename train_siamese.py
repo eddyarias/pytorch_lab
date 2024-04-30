@@ -251,7 +251,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse()
     parser.add_argument('-d', '--dataset', type=str,
-                        help='Path to the lists od the dataset.')
+                        help='Path to the lists of the dataset.')
     parser.add_argument('-b', '--backbone', type=str, default="vgg16",
                         help='Conv-Net backbone.')
     parser.add_argument('-w', '--weights', type=str, default="",
