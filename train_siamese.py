@@ -74,7 +74,7 @@ def main(args):
     else:
         pc_name = socket.gethostname()
     timestamp  = datetime.today().strftime('%Y%m%d_%H%M%S')
-    args.model_name = '{}_{}_siam_{}'.format(args.backbone,timestamp,pc_name)
+    args.model_name = '{}_siam_{}_{}'.format(args.backbone,timestamp,pc_name)
 
     # Get image size
     img_size = (args.img_size, args.img_size)
