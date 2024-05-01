@@ -271,7 +271,7 @@ if __name__ == '__main__':
     parser.add_argument('-ma', '--margin', type=float, default=1.0,
                         help='Triplet loss margin parameter.')
     parser.add_argument('-da', '--da_library', type=str, default="torchvision",
-                        help='Data Augmentation library: < imgaug | albumentations | torchvision >')
+                        help='Data Augmentation library: < albumentations | torchvision >')
     parser.add_argument('-lvl', '--da_level', type=str, default="heavy",
                         help='Data Augmentation level: < light | medium | heavy >')
     parser.add_argument('-vis', '--visdom', action='store_true',
