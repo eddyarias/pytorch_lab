@@ -92,7 +92,7 @@ def main(args):
     model_save_path_last = os.path.join(model_path, "last_model.pth")
     json_log_path = os.path.join(model_path, "log.json")
     loss_fig_path = os.path.join(model_path, "loss.svg")
-    figure_title = "{} {} model loss evolution".format(args.backbone, args.model_name)
+    figure_title = "{} model loss evolution".format(args.model_name)
 
     # Train Transform and DA
     transform = data_aug_selector(args)
