@@ -73,7 +73,8 @@ def main(args):
         pc_name = 'AWS'
     else:
         pc_name = socket.gethostname()
-    args.model_name = datetime.today().strftime('%Y%m%d_%H%M%S') + '_' + pc_name
+    timestamp  = datetime.today().strftime('%Y%m%d_%H%M%S')
+    args.model_name = '{}_{}_siam_{}'.format(args.backbone,timestamp,pc_name)
 
     # Get image size
     img_size = (args.img_size, args.img_size)

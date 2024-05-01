@@ -23,7 +23,8 @@ def initialize_log(args):
     log_dict["image_size"] = img_size
     try: log_dict["classes"] = args.classes
     except: pass
-    log_dict["embedding_size"] = args.embedding_size
+    try: log_dict["embedding_size"] = args.embedding_size
+    except: pass
     log_dict["epochs"] = args.epochs
     log_dict["bs"] = args.batch_size
     log_dict["lr"] = args.learning_rate

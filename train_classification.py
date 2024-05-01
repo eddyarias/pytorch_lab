@@ -75,7 +75,8 @@ def main(args):
         pc_name = 'AWS'
     else:
         pc_name = socket.gethostname()
-    args.model_name = datetime.today().strftime('%Y%m%d_%H%M%S') + '_clas_' + pc_name
+    timestamp  = datetime.today().strftime('%Y%m%d_%H%M%S')
+    args.model_name = '{}_{}_clas_{}'.format(args.backbone,timestamp,pc_name)
 
     # Get image size
     img_size = (args.img_size, args.img_size)
@@ -239,7 +240,7 @@ def main(args):
     # Evaluate model on test set
     print("\nEvaluating on test set ...")
     dists, labels = test_model(test_list, model_path, args.batch_size, args.jobs, model, templates)
-    
+
     # Compute test accuracy
     acc = sum(y_true == y_pred) / len(y_pred)
     print("Test set accuracy: {:0.4f}".format(acc))
