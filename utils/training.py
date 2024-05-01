@@ -17,9 +17,12 @@ def initialize_log(args):
     log_dict["DA_Level"] = args.da_level
     log_dict["model_name"] = args.model_name
     log_dict["backbone"] = args.backbone
-    log_dict["margin"] = args.margin
+    try: log_dict["margin"] = args.margin
+    except: pass
     log_dict["weights"] = args.weights
     log_dict["image_size"] = img_size
+    try: log_dict["classes"] = args.classes
+    except: pass
     log_dict["embedding_size"] = args.embedding_size
     log_dict["epochs"] = args.epochs
     log_dict["bs"] = args.batch_size
