@@ -24,7 +24,14 @@ def get_classes(txt_list):
     classes = len(np.unique(labels))
     return classes
 
+def compute_acc(gt, pred):
+    N = gt.shape[0]
+    correct = gt == pred
+    acc = correct.sum()/N
+    return acc
+
 def train_loop(model, device, data_loader, criterion, optimizer):
+    acc = []
     losses = []
     model.train()
     for images, labels, ind in tqdm(data_loader, desc="Train loop"):
@@ -32,17 +39,19 @@ def train_loop(model, device, data_loader, criterion, optimizer):
         labels = labels.to(device)
 
         optimizer.zero_grad()
-        features = model(images)
+        preds = model(images)
 
-        loss = criterion(features, labels)
+        loss = criterion(preds, labels)
         loss.backward()
         optimizer.step()
 
         losses.append(loss.detach().cpu().numpy())
+        acc.append(compute_acc(labels, preds.argmax(1)).cpu().numpy())
 
-    return np.mean(losses)
+    return np.mean(losses), np.mean(acc)
 
 def validation_loop(model, device, data_loader, criterion):
+    acc = []
     losses = []
     model.eval()
     with torch.no_grad():
@@ -50,13 +59,14 @@ def validation_loop(model, device, data_loader, criterion):
             images = images.to(device)
             labels = labels.to(device)
 
-            features = model(images)
+            preds = model(images)
 
-            loss = criterion(features, labels)
+            loss = criterion(preds, labels)
 
             losses.append(loss.detach().cpu().numpy())
+            acc.append(compute_acc(labels, preds.argmax(1)).cpu().numpy())
 
-    return np.mean(losses)
+    return np.mean(losses), np.mean(acc)
 
 
 def main(args):
@@ -92,7 +102,7 @@ def main(args):
     model_save_path_last = os.path.join(model_path, "last_model.pth")
     json_log_path = os.path.join(model_path, "log.json")
     loss_fig_path = os.path.join(model_path, "loss.svg")
-    figure_title = "{} model loss evolution".format(args.model_name)
+    figure_title = args.model_name
 
     # Train Transform and DA
     transform = data_aug_selector(args)
@@ -157,7 +167,9 @@ def main(args):
     log_dict["training_images"] = len(train_dataset)
     log_dict["validation_images"] = len(validation_dataset)
     train_loss_history = []
+    train_acc_history = []
     val_loss_history = []
+    val_acc_history = []
     epochs = []
     epoch_dt = []
     best_loss = 1000
@@ -171,10 +183,10 @@ def main(args):
         t0 = time.time()
 
         # Train loop
-        train_loss = train_loop(model, device, train_loader, criterion, optimizer)
+        train_loss, train_acc = train_loop(model, device, train_loader, criterion, optimizer)
 
         # Validation loop
-        val_loss = validation_loop(model, device, validation_loader, criterion)
+        val_loss, val_acc = validation_loop(model, device, validation_loader, criterion)
 
         # Update scheduler
         if args.lr_update_freq:
@@ -182,15 +194,17 @@ def main(args):
 
         # Store los values
         train_loss_history.append(train_loss)
+        train_acc_history.append(train_acc)
         val_loss_history.append(val_loss)
+        val_acc_history.append(val_acc)
 
         # Stop timer
         t1 = time.time()
         epoch_dt.append(t1-t0)
 
         # Print epoch info
-        print('training  : loss={:.5f}'.format(train_loss))
-        print('validation: loss={:.5f}'.format(val_loss))
+        print('training  : loss={:.5f} , acc={:0.3%}'.format(train_loss, train_acc))
+        print('validation: loss={:.5f} , acc={:0.3%}'.format(val_loss, val_acc))
         print(epoch_time(t0, t1))
 
         # Save latest model
@@ -204,16 +218,20 @@ def main(args):
 
         # Visualize on Visdom
         if args.visdom:
-            plotter.plot('loss', 'training  loss ', figure_title, e, train_loss)
-            plotter.plot('loss', 'validation loss', figure_title, e, val_loss)
+            plotter.plot('value', 'training  loss ', figure_title, e, train_loss)
+            plotter.plot('value', 'validation loss', figure_title, e, val_loss)
+            plotter.plot('value', 'training  acc ', figure_title, e, train_acc)
+            plotter.plot('value', 'validation acc', figure_title, e, val_acc)
 
         # Plot loss
         fig, ax = plt.subplots(1,1, figsize=(8,5))
         ax.plot(epochs, train_loss_history, label='training loss')
         ax.plot(epochs, val_loss_history, label='validation loss')
+        ax.plot(epochs, train_acc_history, label='training acc')
+        ax.plot(epochs, val_acc_history, label='validation acc')
         ax.set_title(figure_title)
         ax.set_xlabel("epoch")
-        ax.set_ylabel("loss")
+        ax.set_ylabel("value")
         ax.legend()
         plt.savefig(loss_fig_path, format="svg")
 
