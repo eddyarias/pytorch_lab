@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from models.classification import load_model
 from dataloaders.Image_Dataset import Image_Dataset
 
-def test_model(test_list, model_folder, batch_size, jobs, model=None, templates=None):
+def test_model(test_list, model_folder, batch_size, jobs, model=None):
 
     # Configuration
     weights = os.path.join(model_folder, 'best_model.pth')
@@ -40,23 +40,22 @@ def test_model(test_list, model_folder, batch_size, jobs, model=None, templates=
 
     # Make predictions
     model.eval()
-    dists = np.zeros(len(dataset), dtype=float)
+    scores = np.zeros((len(dataset),classes), dtype=float)
     labels = np.zeros(len(dataset), dtype=int)
     with torch.no_grad():
         for image, label, index in tqdm(dataloader):
-            preds = model(image.to(device)).detach().clone()
+            preds = model(image.to(device)).detach().cpu().clone()
             for i in range(label.shape[0]):
                 idx = index[i].item()
-                dist = calc_euclidean(templates, preds[1].unsqueeze(0))
-                dists[idx] = dist.item()
+                scores[idx] = preds[i].numpy()
                 labels[idx] = label[i].item()
 
     # Save scores
     scores_path = os.path.join(model_folder, 'scores.npz')
-    np.savez(scores_path, scores=dists, labels=labels, dataset=test_list)
+    np.savez(scores_path, scores=scores, labels=labels, dataset=test_list)
     print('\nScores saved at: \n{}\n'.format(scores_path))
     
-    return dists, labels
+    return labels, np.argmax(scores,axis=1)
 
 
 if __name__ == '__main__':

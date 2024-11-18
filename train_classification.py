@@ -254,16 +254,16 @@ def main(args):
     print("Path: {}".format(model_save_path_best))
     model.load_state_dict(torch.load(model_save_path_best, map_location=device))
     model.eval()
-    '''
+    
     # Evaluate model on test set
     print("\nEvaluating on test set ...")
-    dists, labels = test_model(test_list, model_path, args.batch_size, args.jobs, model, templates)
+    y_true, y_pred = test_model(test_list, model_path, args.batch_size, args.jobs, model)
 
     # Compute test accuracy
     acc = sum(y_true == y_pred) / len(y_pred)
     print("Test set accuracy: {:0.4f}".format(acc))
     print(" ")
-    '''
+    
 
 if __name__ == '__main__':
     parser = argparse()
