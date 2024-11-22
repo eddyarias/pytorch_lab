@@ -4,6 +4,7 @@ figures/
 
 *.ipynb
 *.ipynb_checkpoints
+*.sh
 *.asv
 *.pyc
 *.out
