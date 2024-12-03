@@ -1,4 +1,5 @@
 import os
+import json
 import torch
 from PIL import Image
 from torchvision.transforms import v2
@@ -7,43 +8,39 @@ from models.siamese import siamese_embeddings
 from argparse import ArgumentParser as argparse
 
 parser = argparse()
-parser.add_argument('-b', '--backbone', required=True, 
-                    help="Model´s backbone")
-parser.add_argument('-t', '--model_type', default='clas', choices=['clas', 'siam'], 
-                    help="Model type. Classiffication=clas, Siamese=siam")
-parser.add_argument('-w', '--weights', required=True, 
-                    help='Path to model weights file')
-parser.add_argument('-c', '--classes', type=int, required=True,
-                    help='Number of output classes')
-parser.add_argument('-W', '--width', type=int, default=320,
-                    help='Input image width')
-parser.add_argument('-H', '--height', type=int, default=240,
-                    help='Input image height')
-parser.add_argument('-C', '--channels', type=int, default=3,
-                    help='Number of channels in the input image')
+parser.add_argument('-m', '--model_folder', required=True, 
+                    help='Path to model folder')
 args = parser.parse_args()
 
-# Read Image parameters
-RESOLUTION =  (args.width, args.height)
-W, H =  (args.width, args.height)
-NUM_CHANNELS = args.channels
-NUM_CLASSES = args.classes
+# Read model parameters
+weights = os.path.join(args.model_folder, 'best_model.pth')
+config = os.path.join(args.model_folder, 'log.json')
+cfg_dict = json.load(open(config))
+backbone = cfg_dict["backbone"]
+model_type = cfg_dict["model_type"]
+W, H = cfg_dict["image_size"]
+NUM_CLASSES = cfg_dict["classes"]
+RESOLUTION =  (W, H)
+NUM_CHANNELS = 3
 MODE = 'RGB' if NUM_CHANNELS==3 else 'L'
 
 # Use cpu
 device = 'cpu'
 
 # Load model
-if args.model_type == 'clas':
-    model = load_model(args.backbone, args.weights, NUM_CLASSES)
+if model_type == 'classification':
+    model = load_model(backbone, weights, NUM_CLASSES)
+elif model_type == 'siamese':
+    model = siamese_embeddings(backbone, weights)
 else:
-    model = siamese_embeddings(args.backbone, args.weights)
+    print('Model type "{}" not supported'.format(model_type))
+    exit()
 model.to(device)
 model.eval()
 
 # Count number of parameters
 n_params = sum(p.numel() for p in model.parameters())
-print('{}_{} successfully loaded in {}'.format(args.backbone, args.model_type, device))
+print('{}_{} successfully loaded in {}'.format(backbone, model_type, device))
 print('Number of parameters: {:d}\n'.format(n_params))
 
 # Generate Dummy input
@@ -56,13 +53,13 @@ dummy_input = Image.new(MODE, RESOLUTION, (128, 255, 0))
 dummy_input = tform(dummy_input).unsqueeze(0)
 
 # Save with onnx format
-folder = os.path.dirname(args.weights)
-name = os.path.basename(args.weights).split('.')[0] + '.onnx'
-opt_path = os.path.join(folder, name)
+name = os.path.basename(weights).split('.')[0] + '.onnx'
+opt_path = os.path.join(args.model_folder, name)
+#with torch.no_grad:
 torch.onnx.export(model, dummy_input, opt_path)
 print('Model seved at:')
 print(opt_path)
 
 # Next step
 print('\nTo serialize the model with OpenVINO run the following command:')
-print('mo --framework=onnx --input_model={} --input_shape=[1,{},{},{}] --output_dir={}'.format(opt_path, NUM_CHANNELS, H, W, folder))
+print('mo --framework=onnx --input_model={} --input_shape=[1,{},{},{}] --output_dir={}'.format(opt_path, NUM_CHANNELS, H, W, args.model_folder))

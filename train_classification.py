@@ -19,11 +19,6 @@ from test_classification import test_model
 from models.classification import load_model
 from dataloaders.Image_Dataset import Image_Dataset
 
-def get_classes(txt_list):
-    img_paths, labels = read_list(txt_list)
-    classes = len(np.unique(labels))
-    return classes
-
 def compute_acc(gt, pred):
     N = gt.shape[0]
     correct = gt == pred
@@ -123,7 +118,7 @@ def main(args):
     test_list = os.path.join(args.dataset, 'test.txt')
 
     # Get number of classes
-    args.classes = get_classes(train_list)
+    args.classes = train_dataset.n_classes
 
     # Get pretrained model
     model = load_model(args.backbone, args.weights, args.classes)
@@ -163,7 +158,7 @@ def main(args):
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.lr_update_freq, gamma=0.1)
 
     # Loop variables
-    log_dict = initialize_log(args)
+    log_dict = initialize_log(args, type='classification')
     log_dict["training_images"] = len(train_dataset)
     log_dict["validation_images"] = len(validation_dataset)
     train_loss_history = []

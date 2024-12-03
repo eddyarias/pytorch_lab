@@ -6,7 +6,7 @@ def epoch_time(t0, t1):
     return "Time: {:d}h {:d}m {:0.1f}s".format(HH, MM, SS)
 
 
-def initialize_log(args):
+def initialize_log(args, type='classification'):
     img_size=(args.img_size,args.img_size)
 
     log_dict = dict()
@@ -17,18 +17,17 @@ def initialize_log(args):
     log_dict["DA_Level"] = args.da_level
     log_dict["model_name"] = args.model_name
     log_dict["backbone"] = args.backbone
-    try: log_dict["margin"] = args.margin
-    except: pass
+    log_dict["model_type"] = type
+    if type=='siamese': log_dict["margin"] = args.margin
     log_dict["weights"] = args.weights
     log_dict["image_size"] = img_size
-    try: log_dict["classes"] = args.classes
-    except: pass
-    try: log_dict["embedding_size"] = args.embedding_size
-    except: pass
+    log_dict["classes"] = args.classes
+    if type=='siamese': log_dict["embedding_size"] = args.embedding_size
     log_dict["epochs"] = args.epochs
     log_dict["bs"] = args.batch_size
     log_dict["lr"] = args.learning_rate
     log_dict["lr_update_freq"] = args.lr_update_freq
     log_dict["jobs"] = args.jobs
+    if type=='siamese': log_dict["number_of_templates"] = args.templates
 
     return log_dict

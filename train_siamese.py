@@ -121,6 +121,9 @@ def main(args):
     # Get embedding size
     args.embedding_size = get_embedding_size(model, img_size, device)
 
+    # Get number of classes
+    args.classes = train_dataset.n_classes
+
     # Print info
     print(" ")
     print("Model architecture:")
@@ -137,12 +140,14 @@ def main(args):
     print("Backbone: {}".format(args.backbone))
     print("Weights: {}".format(args.weights))
     print("Image size: {}".format(img_size))
+    print("N classes: {}".format(args.classes))
     print("Embedding size: {}".format(args.embedding_size))
     print("Epochs: {:d}".format(args.epochs))
     print("bs: {:d}".format(args.batch_size))
     print("lr: {:f}".format(args.learning_rate))
     print("lr update freq: {:d}".format(args.lr_update_freq))
     print("jobs: {:d}".format(args.jobs))
+    print("templates: {:d}".format(args.templates))
     print(" ")
 
     # Optimizer
@@ -152,7 +157,7 @@ def main(args):
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.lr_update_freq, gamma=0.1)
 
     # Loop variables
-    log_dict = initialize_log(args)
+    log_dict = initialize_log(args, type='siamese')
     log_dict["training_images"] = len(train_dataset)
     log_dict["validation_images"] = len(validation_dataset)
     train_loss_history = []
@@ -237,7 +242,7 @@ def main(args):
     model.eval()
 
     # Get templates
-    templates = make_templates(train_list, model_path, 4, model)
+    templates = make_templates(train_list, model_path, args.templates, model)
 
     # Evaluate model on test set
     print("\nEvaluating on test set ...")
@@ -275,6 +280,8 @@ if __name__ == '__main__':
                         help='Data Augmentation library: < albumentations | torchvision >')
     parser.add_argument('-lvl', '--da_level', type=str, default="heavy",
                         help='Data Augmentation level: < light | medium | heavy >')
+    parser.add_argument('-t', '--templates', type=int, default=4,
+                        help='Number of templates to use.')
     parser.add_argument('-vis', '--visdom', action='store_true',
                         help='Visualize training on visdom.')
     args = parser.parse_args()

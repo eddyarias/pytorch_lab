@@ -35,6 +35,9 @@ class Image_Dataset(Dataset):
         # Set dataset length
         self.len = len(self.images)
 
+        # Get number of classes
+        self.n_classes = len(np.unique(self.labels))
+
     def __len__(self):
         return self.len
     
