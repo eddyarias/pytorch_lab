@@ -1,6 +1,7 @@
 import os
 import json
 import torch
+import numpy as np
 from PIL import Image
 from torchvision.transforms import v2
 from models.classification import load_model
@@ -22,7 +23,6 @@ W, H = cfg_dict["image_size"]
 NUM_CLASSES = cfg_dict["classes"]
 RESOLUTION =  (W, H)
 NUM_CHANNELS = 3
-MODE = 'RGB' if NUM_CHANNELS==3 else 'L'
 
 # Use cpu
 device = 'cpu'
@@ -49,7 +49,8 @@ tform = v2.Compose([
             v2.ToDtype(torch.float32, scale=True),
             v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ])
-dummy_input = Image.new(MODE, RESOLUTION, (128, 255, 0))
+dummy_input = 255*np.random.rand(128,128,3)
+dummy_input = Image.fromarray(dummy_input.astype('uint8')).resize(RESOLUTION)
 dummy_input = tform(dummy_input).unsqueeze(0)
 
 # Save with onnx format
@@ -57,7 +58,7 @@ name = os.path.basename(weights).split('.')[0] + '.onnx'
 opt_path = os.path.join(args.model_folder, name)
 #with torch.no_grad:
 torch.onnx.export(model, dummy_input, opt_path)
-print('Model seved at:')
+print('Model saved at:')
 print(opt_path)
 
 # Next step

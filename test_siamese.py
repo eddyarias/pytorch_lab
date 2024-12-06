@@ -62,7 +62,7 @@ def test_model(test_list, model_folder, batch_size, jobs, model=None, templates=
 
     # Save scores
     scores_path = os.path.join(model_folder, 'scores.npz')
-    np.savez(scores_path, scores=dists, labels=labels, dataset=test_list)
+    np.savez(scores_path, scores=dists, labels=labels, dataset=test_list, images=dataset.images)
     print('\nScores saved at: \n{}\n'.format(scores_path))
     
     return dists, labels
