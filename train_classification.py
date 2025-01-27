@@ -104,18 +104,18 @@ def main(args):
 
     # Train loader
     print("\nLoading training set ...")
-    train_list = os.path.join(args.dataset, 'train.txt')
+    train_list = os.path.join(args.dataset, 'train_with_cordinates.txt')
     train_dataset = Image_Dataset(train_list, args=args, transform=transform, treatment=args.treatment, coordinates_file=args.coordinates_file)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.jobs)
 
     # Validation loader
     print("\nLoading validation set ...")
-    validation_list = os.path.join(args.dataset, 'validation.txt')
+    validation_list = os.path.join(args.dataset, 'validation_with_cordinates.txt')
     validation_dataset = Image_Dataset(validation_list, img_size=img_size, transform=None, treatment=args.treatment, coordinates_file=args.coordinates_file)
     validation_loader = DataLoader(validation_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.jobs)
 
     # Test loader
-    test_list = os.path.join(args.dataset, 'test.txt')
+    test_list = os.path.join(args.dataset, 'test_with_cordinates.txt')
 
     # Get number of classes
     args.classes = train_dataset.n_classes
