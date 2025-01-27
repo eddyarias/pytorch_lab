@@ -33,11 +33,17 @@ def read_list(list_path, limit=None):
         N = len(text)
     img_paths = []
     labels = []
+    coordinates = {}
     for line in text:
-        img, lbl = line.split(' ')
+        parts = line.split()
+        img = parts[0]
+        lbl = int(parts[1])
         img_paths.append(img)
-        labels.append(int(lbl))
-    return img_paths, labels
+        labels.append(lbl)
+        if len(parts) == 5:
+            box = list(map(float, parts[1:]))
+            coordinates[img] = box
+    return img_paths, labels, coordinates
 
 def write_txt(lst, opt_path):
     # open file in write mode

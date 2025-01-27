@@ -105,13 +105,13 @@ def main(args):
     # Train loader
     print("\nLoading training set ...")
     train_list = os.path.join(args.dataset, 'train.txt')
-    train_dataset = Image_Dataset(train_list, args=args, transform=transform)
+    train_dataset = Image_Dataset(train_list, args=args, transform=transform, treatment=args.treatment, coordinates_file=args.coordinates_file)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.jobs)
 
     # Validation loader
     print("\nLoading validation set ...")
     validation_list = os.path.join(args.dataset, 'validation.txt')
-    validation_dataset = Image_Dataset(validation_list, img_size=img_size, transform=None)
+    validation_dataset = Image_Dataset(validation_list, img_size=img_size, transform=None, treatment=args.treatment, coordinates_file=args.coordinates_file)
     validation_loader = DataLoader(validation_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.jobs)
 
     # Test loader
@@ -286,6 +286,10 @@ if __name__ == '__main__':
                         help='Data Augmentation level: < light | medium | heavy >')
     parser.add_argument('-vis', '--visdom', action='store_true',
                         help='Visualize training on visdom.')
+    parser.add_argument('-cf', '--coordinates_file', type=str, required=True,
+                        help='Path to the file containing object coordinates.')
+    parser.add_argument('-t', '--treatment', type=str, default='black',
+                        help='Treatment to apply to the object: < black | blur >')
     args = parser.parse_args()
 
     main(args)
